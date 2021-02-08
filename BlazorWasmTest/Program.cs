@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MudBlazor.Services;
+using BlazorWasmTest.Services;
+using Polly;
 
 namespace BlazorWasmTest
 {
@@ -21,6 +23,12 @@ namespace BlazorWasmTest
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
             builder.Services.AddMudServices();
+
+            builder.Services.AddHttpClient<AuthService>()
+                .AddTransientHttpErrorPolicy(p =>
+                    p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(300)));
+
+
 
             await builder.Build().RunAsync();
         }
